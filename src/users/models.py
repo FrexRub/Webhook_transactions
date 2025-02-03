@@ -1,7 +1,8 @@
-from typing import Optional, TYPE_CHECKING
+from datetime import datetime
+from typing import Optional
 
-from sqlalchemy import DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Boolean, DateTime, func
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.database import Base
 
@@ -10,13 +11,12 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    full_name: Mapped[str]
-    email: Mapped[str] = mapped_column(index=True)
-    date_birth: Mapped[DateTime] = mapped_column(DateTime)
-
-    books: Mapped[list["Book"]] = relationship(
-        back_populates="author", cascade="all, delete-orphan", passive_deletes=True
+    full_name: Mapped[Optional[str]]
+    email: Mapped[str] = mapped_column(unique=True, index=True)
+    registered_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=datetime.utcnow(),
     )
-
-    def __str__(self):
-        return f"Author id:{self.id} full_name: {self.full_name} date_birthe:{self.date_birth}"
+    hashed_password: Mapped[str]
+    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
