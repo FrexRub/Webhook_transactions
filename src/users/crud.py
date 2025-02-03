@@ -15,6 +15,7 @@ from src.core.exceptions import (
     ErrorInData,
 )
 from src.core.jwt_utils import create_hash_password
+from src.payments.models import Score
 from src.users.models import User
 from src.users.schemas import (
     UserCreateSchemas,
@@ -66,6 +67,8 @@ async def create_user(session: AsyncSession, user_data: UserCreateSchemas) -> Us
         new_user.hashed_password = create_hash_password(
             new_user.hashed_password
         ).decode()
+        new_score: Score = Score()
+        new_user.scores.append(new_score)
         session.add(new_user)
         await session.commit()
         logger.info("User with email %s created" % user_data.email)
