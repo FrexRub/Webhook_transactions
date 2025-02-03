@@ -1,10 +1,13 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import Base
+
+if TYPE_CHECKING:
+    from src.payments.models import Score
 
 
 class User(Base):
@@ -20,3 +23,9 @@ class User(Base):
     )
     hashed_password: Mapped[str]
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    scores: Mapped[list["Score"]] = relationship(
+        back_populates="user",
+        cascade="save-update, merge, delete",
+        passive_deletes=True,
+    )
