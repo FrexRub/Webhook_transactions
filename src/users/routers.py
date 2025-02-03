@@ -19,9 +19,11 @@ from src.users.crud import (
     get_users,
     update_user_db,
     delete_user_db,
+    find_user_by_email,
 )
 from src.core.depends import (
     current_superuser_user,
+    current_user_authorization,
     user_by_id,
 )
 from src.users.models import User
@@ -43,3 +45,15 @@ async def get_list_users(
     user: User = Depends(current_superuser_user),
 ):
     return paginate(await get_users(session=session))
+
+
+@router.get(
+    "/me",
+    response_model=OutUserSchemas,
+    status_code=status.HTTP_200_OK,
+)
+async def get_info_about_me(
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_authorization),
+):
+    return await find_user_by_email(session=session, email=user.email)
