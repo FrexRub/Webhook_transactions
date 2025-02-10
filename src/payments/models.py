@@ -1,9 +1,18 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Integer, DateTime, func, ForeignKey, UniqueConstraint, UUID
+from sqlalchemy import (
+    DateTime,
+    func,
+    ForeignKey,
+    UniqueConstraint,
+    Index,
+    UUID,
+    NUMERIC,
+    String,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 
 from src.core.database import Base
 
@@ -15,10 +24,18 @@ class Score(Base):
     __tablename__ = "scores"
     __table_args__ = (
         UniqueConstraint("account_id", "user_id", name="idx_unique_account_user"),
+        Index(
+            "idx_account_number_hash",
+            "account_number",
+            postgresql_using="hash",
+        ),
     )
 
     account_id: Mapped[int] = mapped_column(primary_key=True)
-    balance: Mapped[int] = mapped_column(Integer, default=0)
+    balance: Mapped[NUMERIC] = mapped_column(
+        NUMERIC(15, 2), default=0.00, server_default=text("0.00")
+    )
+    account_number: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     date_creation: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
