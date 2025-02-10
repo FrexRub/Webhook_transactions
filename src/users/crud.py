@@ -15,6 +15,7 @@ from src.core.exceptions import (
     ErrorInData,
 )
 from src.core.jwt_utils import create_hash_password
+from src.utlls.create_account_number import generate_bank_account
 from src.payments.models import Score
 from src.users.models import User
 from src.users.schemas import (
@@ -22,6 +23,7 @@ from src.users.schemas import (
     UserUpdateSchemas,
     UserUpdatePartialSchemas,
 )
+
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,7 +69,19 @@ async def create_user(session: AsyncSession, user_data: UserCreateSchemas) -> Us
         new_user.hashed_password = create_hash_password(
             new_user.hashed_password
         ).decode()
-        new_score: Score = Score()
+
+        new_bank_account: str = await generate_bank_account()
+        while True:
+            stmt = select(Score).filter(Score.account_number == new_bank_account)
+            result: Result = await session.execute(stmt)
+            bank_account = result.scalars().one_or_none()
+
+            if bank_account:
+                new_bank_account: str = await generate_bank_account()
+            else:
+                break
+
+        new_score: Score = Score(account_number=new_bank_account)
         new_user.scores.append(new_score)
         session.add(new_user)
         await session.commit()
