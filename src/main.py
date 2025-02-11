@@ -21,6 +21,7 @@ from src.core.exceptions import (
 )
 from src.users.models import User
 from src.users.routers import router as router_users
+from src.payments.routers import router as router_payments
 
 
 warnings.simplefilter("ignore", FastAPIPaginationWarning)
@@ -29,7 +30,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 app = FastAPI()
 
 app.include_router(router_users)
-
+app.include_router(router_payments)
 
 add_pagination(app)
 
@@ -64,7 +65,7 @@ async def login_for_access_token(
 
 @app.get("/", response_class=HTMLResponse)
 def index(response: Response):
-    return HTMLResponse("<h2> Library Management </h2>")
+    return HTMLResponse("<h2> Transaction handler</h2>")
 
 
 if __name__ == "__main__":
