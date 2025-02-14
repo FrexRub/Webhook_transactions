@@ -1,7 +1,7 @@
 from decimal import Decimal
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
 
 class ScoreBaseSchemas(BaseModel):
@@ -14,3 +14,9 @@ class ScoreOutSchemas(ScoreBaseSchemas):
     account_id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ScoreUsersSchemas(BaseModel):
+    full_name: str
+    email: EmailStr
+    scores: list[ScoreOutSchemas]
