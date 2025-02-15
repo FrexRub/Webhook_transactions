@@ -38,8 +38,16 @@ class PaymentGenerateBaseSchemas(BaseModel):
     user_id: int
     account_id: int
     amount: Decimal
+    transaction_id: str = Field(default="")
 
 
-class PaymentGenerateOutBaseSchemas(PaymentGenerateBaseSchemas):
+class PaymentGenerateOutSchemas(PaymentGenerateBaseSchemas):
+    signature: str
+
+
+class TransactionInSchemas(BaseModel):
     transaction_id: str
+    user_id: int
+    account_id: int
+    amount: Decimal
     signature: str

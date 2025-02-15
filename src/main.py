@@ -24,8 +24,9 @@ from src.users.models import User
 from src.users.routers import router as router_users
 from src.payments.routers import router as router_payments
 from src.webhooks import webhooks_router
-from src.payments.schemas import PaymentGenerateBaseSchemas
-from src.utils.processing import generate_payments
+from src.payments.schemas import PaymentGenerateBaseSchemas, TransactionInSchemas
+from src.utils.processing import generate_payments, process_transaction
+from src.core.exceptions import ErrorInData
 
 
 warnings.simplefilter("ignore", FastAPIPaginationWarning)
@@ -43,14 +44,42 @@ logger = logging.getLogger(__name__)
 
 
 @app.post(
-    "/create_payment", response_class=JSONResponse, status_code=status.HTTP_202_ACCEPTED
+    "/create_payment",
+    response_class=JSONResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["main"],
 )
 async def create_payment(data_request: PaymentGenerateBaseSchemas):
     await generate_payments(data_request)
     return await generate_payments(data_request)
 
 
-@app.post("/token", response_class=JSONResponse, status_code=status.HTTP_202_ACCEPTED)
+@app.post(
+    "/transaction",
+    response_class=JSONResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["main"],
+)
+async def post_process_transaction(
+    data_request: TransactionInSchemas,
+    session: AsyncSession = Depends(get_async_session),
+):
+    try:
+        result = await process_transaction(session=session, data_request=data_request)
+    except ErrorInData as exp:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{exp}",
+        )
+    return result
+
+
+@app.post(
+    "/token",
+    response_class=JSONResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["main"],
+)
 async def login_for_access_token(
     data_login: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: AsyncSession = Depends(get_async_session),
@@ -78,7 +107,7 @@ async def login_for_access_token(
         )
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def index():
     return HTMLResponse("<h2> Transaction handler</h2>")
 
