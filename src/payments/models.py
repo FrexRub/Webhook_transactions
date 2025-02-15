@@ -55,7 +55,7 @@ class Payment(Base):
     )
 
     transaction_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
-    amount: Mapped[int]
+    amount: Mapped[NUMERIC] = mapped_column(NUMERIC(15, 2), nullable=False)
     date_creation: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
