@@ -3,6 +3,7 @@ import aiohttp
 
 from src.core.config import configure_logging
 from src.payments.schemas import PaymentOutSchemas
+from src.users.schemas import OutUserSchemas
 
 
 configure_logging(logging.INFO)
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 WEBHOOK_URL = "https://httppbin.org/post"  # здесь указывается URL сервера-получателя
 
 
-async def send_new_payment_notification(payment: PaymentOutSchemas) -> None:
+async def send_new_payment_notification(payment_user: OutUserSchemas) -> None:
     wh_data = PaymentOutSchemas.model_dump()
     logger.info("Notify new payment")
     async with aiohttp.ClientSession() as session:
