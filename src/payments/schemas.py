@@ -32,3 +32,14 @@ class PaymentOutSchemas(PaymentBaseSchemas):
     transaction_id: UUID4 = Field(default_factory=uuid4)
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PaymentGenerateBaseSchemas(BaseModel):
+    user_id: int
+    account_id: int
+    amount: Decimal
+
+
+class PaymentGenerateOutBaseSchemas(PaymentGenerateBaseSchemas):
+    transaction_id: str
+    signature: str
