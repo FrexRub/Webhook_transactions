@@ -15,7 +15,7 @@ from src.core.exceptions import (
     ErrorInData,
 )
 from src.core.jwt_utils import create_hash_password
-from src.utlls.create_account_number import generate_bank_account
+from src.utils.create_account_number import generate_bank_account
 from src.payments.models import Score
 from src.users.models import User
 from src.users.schemas import (
