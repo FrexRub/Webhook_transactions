@@ -2,9 +2,9 @@ import warnings
 from typing import Annotated
 import logging
 
-from fastapi import FastAPI, Depends, status, Request
+from fastapi import FastAPI, Depends, status
 from fastapi.exceptions import HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi_pagination import add_pagination
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi_pagination.utils import FastAPIPaginationWarning
@@ -23,6 +23,7 @@ from src.core.exceptions import (
 from src.users.models import User
 from src.users.routers import router as router_users
 from src.payments.routers import router as router_payments
+from src.webhooks import webhooks_router
 from src.payments.schemas import PaymentGenerateBaseSchemas
 from src.utils.processing import generate_payments
 
@@ -30,7 +31,7 @@ from src.utils.processing import generate_payments
 warnings.simplefilter("ignore", FastAPIPaginationWarning)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-app = FastAPI()
+app = FastAPI(webhooks=webhooks_router)
 
 app.include_router(router_users)
 app.include_router(router_payments)
@@ -39,13 +40,6 @@ add_pagination(app)
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-@app.post("/webhook")
-async def webhook(request: Request) -> None:
-    logging.info("Received webhook request")
-    # update = Update.model_validate(await request.json(), context={"bot": bot})
-    logging.info("Update processed")
 
 
 @app.post(
