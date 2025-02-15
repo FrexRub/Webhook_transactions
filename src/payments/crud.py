@@ -31,3 +31,13 @@ async def list_users_scores(session: AsyncSession):
     users = result.scalars().all()
 
     return list(users)
+
+
+async def list_payments(session: AsyncSession, user_id: int):
+    logger.info("Get list payments for user with id: %s" % user_id)
+
+    stmt = select(Payment).filter(Payment.user_id == user_id)
+    result: Result = await session.execute(stmt)
+    scores = result.scalars().all()
+
+    return list(scores)

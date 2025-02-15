@@ -1,7 +1,8 @@
 from decimal import Decimal
 from datetime import datetime
+from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, EmailStr
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, UUID4
 
 
 class ScoreBaseSchemas(BaseModel):
@@ -20,3 +21,14 @@ class ScoreUsersSchemas(BaseModel):
     full_name: str
     email: EmailStr
     scores: list[ScoreOutSchemas]
+
+
+class PaymentBaseSchemas(BaseModel):
+    amount: Decimal = Field(max_digits=15, decimal_places=2)
+    date_creation: datetime
+
+
+class PaymentOutSchemas(PaymentBaseSchemas):
+    transaction_id: UUID4 = Field(default_factory=uuid4)
+
+    model_config = ConfigDict(from_attributes=True)

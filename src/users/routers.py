@@ -1,20 +1,15 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi_pagination import Page, paginate
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.config import COOKIE_NAME
 from src.core.database import get_async_session
 from src.core.exceptions import (
     ErrorInData,
-    NotFindUser,
     EmailInUse,
-    ExceptUser,
     UniqueViolationError,
 )
-from src.core.jwt_utils import create_jwt, validate_password
 from src.users.crud import (
-    get_user_from_db,
     create_user,
     get_users,
     update_user_db,
