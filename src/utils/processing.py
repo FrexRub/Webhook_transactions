@@ -1,18 +1,23 @@
 import uuid
 import hashlib
 import asyncio
+import logging
 
+from pika import BlockingConnection
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.payments.schemas import (
     PaymentGenerateBaseSchemas,
     PaymentGenerateOutSchemas,
 )
-from src.core.config import setting_conn
+from src.core.config import setting_conn, configure_logging, setting_rabitmq
 from src.payments.schemas import TransactionInSchemas
 from src.core.exceptions import (
     ErrorInData,
 )
+
+configure_logging(logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 async def generate_payments(
@@ -53,5 +58,13 @@ async def process_transaction(
 
     if data_request.signature != data_generate.signature:
         raise ErrorInData("Error signature")
-    else:
-        return "Ok"
+
+    # реализация rebitmq
+    with BlockingConnection(setting_rabitmq.connection_params) as conn:
+        with conn.channel() as ch:
+            ch.queue_declare(queue="massages")
+            ch.basic_publish(
+                exchange="", routing_key="massages", body=data.model_dump_json()
+            )
+            logger.info("Send message")
+    return "Ok"
