@@ -3,35 +3,47 @@ import sys
 import json
 from typing import Any
 import logging
-from pika import BlockingConnection
+import asyncio
+import aio_pika
 
-from config import configure_logging, setting_rabitmq
+from config import configure_logging, setting
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def processing(ch, method, properties, body):
-    # data: dict[str, Any] = json.loads(body.decode())
-    data = json.loads(body.decode())
-    print(f" [x] Received {data}")
+async def process_message(
+    message: aio_pika.abc.AbstractIncomingMessage,
+) -> None:
+    async with message.process():
+        data: dict[str, Any] = json.loads(message.body.decode())
+        print(data)
+        await asyncio.sleep(1)
 
-    # флаг успешной обработки сообщения
-    ch.basic_ack(delivery_tag=method.delivery_tag)
 
+async def consumer() -> None:
+    connection = await aio_pika.connect_robust(setting.rmq.url)
+    queue_name = setting.rmq.routing_key
+    # Creating channel
+    channel = await connection.channel()
+    # Maximum message count which will be processing at the same time.
+    await channel.set_qos(prefetch_count=100)
+    # Declaring queue
+    queue = await channel.declare_queue(queue_name, auto_delete=False)
 
-def consumer():
-    with BlockingConnection(setting_rabitmq.connection_params) as conn:
-        with conn.channel() as ch:
-            ch.queue_declare(queue="massages")
-            ch.basic_consume(queue="massages", on_message_callback=processing)
-            print(" [*] Waiting for messages. To exit press CTRL+C")
-            ch.start_consuming()
+    await queue.consume(process_message)
+    print(" [*] Waiting for messages. To exit press CTRL+C")
+
+    try:
+        # Wait until terminate
+        await asyncio.Future()
+    finally:
+        await connection.close()
 
 
 if __name__ == "__main__":
     try:
-        consumer()
+        asyncio.run(consumer())
     except KeyboardInterrupt:
         print("Interrupted")
         try:

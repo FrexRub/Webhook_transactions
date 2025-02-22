@@ -29,6 +29,7 @@ class SettingConn(BaseSettings):
 
     rabbitmq_default_user: str
     rabbitmq_default_pass: str
+    rabbitmq_host: str = "localhost"
 
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
@@ -48,8 +49,16 @@ class AuthJWT(BaseModel):
     access_token_expire_minutes: int = 60
 
 
+class RbMQSetting(BaseSettings):
+    url: str = (
+        f"amqp://{setting_conn.rabbitmq_default_user}:{setting_conn.rabbitmq_default_pass}@{setting_conn.rabbitmq_host}/"
+    )
+    routing_key: str = "massages"
+
+
 class Setting(BaseSettings):
     db: DbSetting = DbSetting()
+    rmq: RbMQSetting = RbMQSetting()
     auth_jwt: AuthJWT = AuthJWT()
 
 
