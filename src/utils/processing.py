@@ -48,9 +48,7 @@ async def generate_payments(
     return result
 
 
-async def process_transaction(
-    session: AsyncSession, data_request: TransactionInSchemas
-):
+async def process_transaction(data_request: TransactionInSchemas) -> None:
     data = PaymentGenerateBaseSchemas(**data_request.model_dump())
     data_generate: PaymentGenerateOutSchemas = await generate_payments(
         data_request=data
@@ -68,4 +66,3 @@ async def process_transaction(
             aio_pika.Message(body=data.model_dump_json().encode()),
             routing_key=setting.rmq.routing_key,
         )
-    return "Ok"

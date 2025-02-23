@@ -62,16 +62,16 @@ async def create_payment(data_request: PaymentGenerateBaseSchemas):
 )
 async def post_process_transaction(
     data_request: TransactionInSchemas,
-    session: AsyncSession = Depends(get_async_session),
+    # session: AsyncSession = Depends(get_async_session),
 ):
     try:
-        result = await process_transaction(session=session, data_request=data_request)
+        await process_transaction(data_request=data_request)
     except ErrorInData as exp:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"{exp}",
         )
-    return result
+    return {"result": "processed"}
 
 
 @app.post(

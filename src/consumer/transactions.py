@@ -2,14 +2,16 @@ import os
 import sys
 import json
 from typing import Any
-import logging
+import decimal
 import asyncio
 import aio_pika
 
-from config import configure_logging, setting
+from sqlalchemy import select, and_
+from sqlalchemy.engine import Result
 
-configure_logging(logging.INFO)
-logger = logging.getLogger(__name__)
+from config import setting
+from database import async_session_maker
+from models import Score, Payment
 
 
 async def process_message(
@@ -18,7 +20,35 @@ async def process_message(
     async with message.process():
         data: dict[str, Any] = json.loads(message.body.decode())
         print(data)
-        await asyncio.sleep(1)
+        account_id = data["account_id"]
+        user_id = data["user_id"]
+        transaction_id = data["transaction_id"]
+        amount = decimal.Decimal(data["amount"])
+
+    async with async_session_maker() as session:
+        stmt = select(Score).filter(
+            and_(
+                Score.account_id == account_id,
+                Score.user_id == user_id,
+            )
+        )
+        result: Result = await session.execute(stmt)
+        scores: Score = result.scalars().first()
+
+        if scores is None:
+            print(
+                f"The score #{account_id} was not found for the user with id: {user_id}"
+            )
+
+        else:
+            async with session.begin_nested():
+                print(f"The score #{account_id} for the user with id: {user_id} change")
+                scores.balance += amount
+                payment: Payment = Payment(
+                    transaction_id=transaction_id, amount=amount, user_id=user_id
+                )
+                session.add(payment)
+                await session.commit()
 
 
 async def consumer() -> None:
