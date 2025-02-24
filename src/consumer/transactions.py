@@ -17,15 +17,25 @@ from models import Score, Payment
 async def process_message(
     message: aio_pika.abc.AbstractIncomingMessage,
 ) -> None:
+    """
+    Исполняет транзакцию, полученную из брокера сообщений на исполнение
+    """
     async with message.process():
         data: dict[str, Any] = json.loads(message.body.decode())
-        print(data)
         account_id = data["account_id"]
         user_id = data["user_id"]
         transaction_id = data["transaction_id"]
         amount = decimal.Decimal(data["amount"])
+        print(f"Start transaction with id {transaction_id}")
 
     async with async_session_maker() as session:
+        stmt = select(Payment).filter(Payment.transaction_id == transaction_id)
+        result: Result = await session.execute(stmt)
+        payment: Payment = result.scalars().first()
+        if payment:
+            print(f"The payment #{transaction_id} is processed")
+            return
+
         stmt = select(Score).filter(
             and_(
                 Score.account_id == account_id,
@@ -48,7 +58,7 @@ async def process_message(
                     transaction_id=transaction_id, amount=amount, user_id=user_id
                 )
                 session.add(payment)
-                await session.commit()
+            await session.commit()
 
 
 async def consumer() -> None:
@@ -57,7 +67,7 @@ async def consumer() -> None:
     # Creating channel
     channel = await connection.channel()
     # Maximum message count which will be processing at the same time.
-    await channel.set_qos(prefetch_count=100)
+    await channel.set_qos(prefetch_count=10)
     # Declaring queue
     queue = await channel.declare_queue(queue_name, auto_delete=False)
 
