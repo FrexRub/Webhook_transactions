@@ -4,7 +4,6 @@ import asyncio
 import logging
 
 import aio_pika
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.payments.schemas import (
     PaymentGenerateBaseSchemas,
@@ -23,6 +22,12 @@ logger = logging.getLogger(__name__)
 async def generate_payments(
     data_request: PaymentGenerateBaseSchemas,
 ) -> PaymentGenerateOutSchemas:
+    """
+    :param data_request: реквизиты платежа для создания транзакции с подписью
+    :type data_request: PaymentGenerateBaseSchemas
+    :rtype: PaymentGenerateOutSchemas
+    :return: возвращает транзакцию с подписью
+    """
     if data_request.transaction_id:
         transaction_id = data_request.transaction_id
     else:
@@ -49,6 +54,12 @@ async def generate_payments(
 
 
 async def process_transaction(data_request: TransactionInSchemas) -> None:
+    """
+    :param data_request: транзакция на исполнение
+    :type data_request: TransactionInSchemas
+    :rtype: None
+    :return:
+    """
     data = PaymentGenerateBaseSchemas(**data_request.model_dump())
     data_generate: PaymentGenerateOutSchemas = await generate_payments(
         data_request=data
