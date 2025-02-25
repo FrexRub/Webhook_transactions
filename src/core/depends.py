@@ -6,7 +6,6 @@ from fastapi.exceptions import HTTPException
 from fastapi.security import (
     APIKeyCookie,
     OAuth2PasswordBearer,
-    OAuth2PasswordRequestForm,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
