@@ -2,7 +2,6 @@ import logging
 import aiohttp
 
 from src.core.config import configure_logging
-from src.payments.schemas import PaymentOutSchemas
 from src.users.schemas import OutUserSchemas
 
 
@@ -13,7 +12,10 @@ WEBHOOK_URL = "https://httppbin.org/post"  # здесь указывается U
 
 
 async def send_new_payment_notification(payment_user: OutUserSchemas) -> None:
-    wh_data = PaymentOutSchemas.model_dump()
+    """
+    Отправка webhook на другой сервер с тестовой информацией
+    """
+    wh_data = payment_user.model_dump()
     logger.info("Notify new payment")
     async with aiohttp.ClientSession() as session:
         async with session.post(WEBHOOK_URL, json=wh_data) as response:
