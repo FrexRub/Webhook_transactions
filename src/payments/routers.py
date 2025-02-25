@@ -20,7 +20,7 @@ router = APIRouter(prefix="/payments", tags=["Payments"])
     response_model=list[ScoreOutSchemas],
     status_code=status.HTTP_200_OK,
 )
-async def get_list_scores(
+async def get_list_scores_foe_user(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user_authorization),
 ):
@@ -32,7 +32,7 @@ async def get_list_scores(
     response_model=Page[ScoreUsersSchemas],
     status_code=status.HTTP_200_OK,
 )
-async def get_list_users(
+async def get_list_users_with_scores(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_superuser_user),
 ):
@@ -44,7 +44,7 @@ async def get_list_users(
     response_model=list[PaymentOutSchemas],
     status_code=status.HTTP_200_OK,
 )
-async def get_list_payments(
+async def get_list_payments_for_user(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user_authorization),
 ):

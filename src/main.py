@@ -32,6 +32,7 @@ from src.core.exceptions import ErrorInData
 warnings.simplefilter("ignore", FastAPIPaginationWarning)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+# включение webhooks в документацию
 app = FastAPI(webhooks=webhooks_router)
 
 app.include_router(router_users)
@@ -62,7 +63,6 @@ async def create_payment(data_request: PaymentGenerateBaseSchemas):
 )
 async def post_process_transaction(
     data_request: TransactionInSchemas,
-    # session: AsyncSession = Depends(get_async_session),
 ):
     try:
         await process_transaction(data_request=data_request)
