@@ -29,11 +29,32 @@ configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+async def find_user_by_email(session: AsyncSession, email: str) -> Optional[User]:
+    """
+    :param session: сессия
+    :type session: AsyncSession
+    :param email: email пользователя
+    :type email: str
+    :rtype: Optional[User]
+    :return: возвращает результат поиска пользователя по email, в т.ч. None
+    """
+    logger.info("User find by email %s" % email)
+    stmt = select(User).filter(User.email == email)
+    result: Result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+
+
 async def get_user_from_db(session: AsyncSession, email: str) -> User:
-    logger.info("Start find user with email: %s" % email)
-    stmt = select(User).where(User.email == email)
-    res: Result = await session.execute(stmt)
-    user: Optional[User] = res.scalars().one_or_none()
+    """
+    :param session: сессия
+    :type session: AsyncSession
+    :param email: email пользователя
+    :type email: str
+    :rtype: User
+    :return: возвращает пользователя по его email
+    """
+    user: Optional[User] = await find_user_by_email(session=session, email=email)
+
     if not user:
         logger.info("User with eail %s not find" % email)
         raise NotFindUser(f"Not find user with {email}")
@@ -42,18 +63,27 @@ async def get_user_from_db(session: AsyncSession, email: str) -> User:
 
 
 async def get_user_by_id(session: AsyncSession, id_user: int) -> Optional[User]:
+    """
+    :param session: сессия
+    :type session: AsyncSession
+    :param id_user: id пользователя
+    :type id_user: int
+    :rtype: Optional[User]
+    :return: возвращает пользователя по его id
+    """
     logger.info("User request by id %d" % id_user)
     return await session.get(User, id_user)
 
 
-async def find_user_by_email(session: AsyncSession, email: str) -> Optional[User]:
-    logger.info("User find by email %s" % email)
-    stmt = select(User).filter(User.email == email)
-    result: Result = await session.execute(stmt)
-    return result.scalar_one_or_none()
-
-
 async def create_user(session: AsyncSession, user_data: UserCreateSchemas) -> User:
+    """
+    :param session: сессия
+    :type session: AsyncSession
+    :param user_data: данные нового пользователя
+    :type user_data: UserCreateSchemas
+    :rtype: User
+    :return: возвращает нового пользователя
+    """
     logger.info("Start create user with email %s" % user_data.email)
     result: Optional[User] = await find_user_by_email(
         session=session, email=user_data.email
@@ -90,6 +120,12 @@ async def create_user(session: AsyncSession, user_data: UserCreateSchemas) -> Us
 
 
 async def get_users(session: AsyncSession) -> list[User]:
+    """
+    :param session: сессия
+    :type session: AsyncSession
+    :rtype: list[User]
+    :return: возвращает список пользователей
+    """
     logger.info("Get list users")
     stmt = select(User).order_by(User.id)
     result: Result = await session.execute(stmt)
@@ -103,6 +139,18 @@ async def update_user_db(
     user_update: Union[UserUpdateSchemas, UserUpdatePartialSchemas],
     partial: bool = False,
 ) -> User:
+    """
+    :param session: сессия
+    :type session: AsyncSession
+    :param user: данные изменяемого пользователя
+    :type user: User
+    :param user_update: новые данные пользователя
+    :type user_update: Union[UserUpdateSchemas, UserUpdatePartialSchemas]
+    :param partial: признак полного или частичного изменения
+    :type partial: bool
+    :rtype: User
+    :return: возвращает измененного пользователя
+    """
     logger.info("Start update user")
     try:
         for name, value in user_update.model_dump(
@@ -119,6 +167,14 @@ async def update_user_db(
 
 
 async def delete_user_db(session: AsyncSession, user: User) -> None:
+    """
+    :param session: сессия
+    :type session: AsyncSession
+    :param user: данные удаляемого пользователя
+    :type user: UserCreateSchemas
+    :rtype: None
+    :return:
+    """
     logger.info("Delete user by id %d" % user.id)
     await session.delete(user)
     await session.commit()
