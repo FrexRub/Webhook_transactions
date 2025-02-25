@@ -2,13 +2,17 @@ from decimal import Decimal
 from datetime import datetime
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, EmailStr, UUID4
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, UUID4, field_serializer
 
 
 class ScoreBaseSchemas(BaseModel):
     balance: Decimal = Field(max_digits=15, decimal_places=2)
     account_number: str
     date_creation: datetime
+
+    @field_serializer("date_creation")
+    def serialize_date_creation(self, dt: datetime, _info):
+        return dt.strftime("%d-%b-%Y")
 
 
 class ScoreOutSchemas(ScoreBaseSchemas):
@@ -26,6 +30,10 @@ class ScoreUsersSchemas(BaseModel):
 class PaymentBaseSchemas(BaseModel):
     amount: Decimal = Field(max_digits=15, decimal_places=2)
     date_creation: datetime
+
+    @field_serializer("date_creation")
+    def serialize_date_creation(self, dt: datetime, _info):
+        return dt.strftime("%d-%b-%Y")
 
 
 class PaymentOutSchemas(PaymentBaseSchemas):

@@ -2,7 +2,14 @@ from typing import Optional
 from datetime import datetime
 import re
 
-from pydantic import BaseModel, EmailStr, ConfigDict, Field, field_validator
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    ConfigDict,
+    Field,
+    field_validator,
+    field_serializer,
+)
 
 PATTERN_PASSWORD = (
     r'^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[!"#\$%&\(\)\*\+,-\.\/:;<=>\?@[\]\^_'
@@ -39,6 +46,10 @@ class OutUserSchemas(UserBaseSchemas):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("registered_at")
+    def serialize_registered_at(self, dt: datetime, _info):
+        return dt.strftime("%d-%b-%Y")
 
 
 class LoginSchemas(BaseModel):
