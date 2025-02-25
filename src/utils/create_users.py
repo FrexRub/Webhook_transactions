@@ -6,6 +6,9 @@ from src.users.schemas import UserCreateSchemas
 
 
 async def create_new_users() -> None:
+    """
+    Утилита по созданию новых пользователей
+    """
     async with async_session_maker() as session:
         user_admin: UserCreateSchemas = UserCreateSchemas(
             full_name="Петров Иван", email="admin@mycomp.com", password="1qaz!QAZ"
