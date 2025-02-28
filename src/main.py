@@ -92,10 +92,10 @@ async def login_for_access_token(
             detail=f"The user with the username: {data_login.username} not found",
         )
 
-    if validate_password(
+    if await validate_password(
         password=data_login.password, hashed_password=user.hashed_password.encode()
     ):
-        access_token: str = create_jwt(str(user.id))
+        access_token: str = await create_jwt(str(user.id))
 
         resp = JSONResponse({"access_token": access_token, "token_type": "bearer"})
         resp.set_cookie(key=COOKIE_NAME, value=access_token, httponly=True)

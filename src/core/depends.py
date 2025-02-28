@@ -15,12 +15,13 @@ from src.core.jwt_utils import decode_jwt
 from src.users.crud import get_user_by_id
 from src.users.models import User
 
-cookie_scheme = APIKeyCookie(name=COOKIE_NAME)
+# cookie_scheme = APIKeyCookie(name=COOKIE_NAME)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def current_user_authorization(
-    token: str = Depends(cookie_scheme),
+    # token: str = Depends(cookie_scheme),
+    token: Annotated[str, Depends(oauth2_scheme)],
     session: AsyncSession = Depends(get_async_session),
 ) -> User:
     if token is None:
@@ -29,7 +30,7 @@ async def current_user_authorization(
         )
 
     try:
-        payload = decode_jwt(token)
+        payload = await decode_jwt(token)
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not authorized"

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import asyncio
 
 import bcrypt
 import jwt
@@ -6,7 +7,7 @@ import jwt
 from src.core.config import setting, setting_conn
 
 
-def create_hash_password(password: str) -> bytes:
+async def create_hash_password(password: str) -> bytes:
     """
     Создание хеш пароля
     :param password: пароль
@@ -16,10 +17,11 @@ def create_hash_password(password: str) -> bytes:
     """
     salt = bcrypt.gensalt()
     pwd_bytes: bytes = password.encode()
+    await asyncio.sleep(0)
     return bcrypt.hashpw(pwd_bytes, salt)
 
 
-def validate_password(
+async def validate_password(
     password: str,
     hashed_password: bytes,
 ) -> bool:
@@ -32,13 +34,14 @@ def validate_password(
     :rtype: bool
     :return: возвращает True, если пароль верный иначе - False
     """
+    await asyncio.sleep(0)
     return bcrypt.checkpw(
         password=password.encode(),
         hashed_password=hashed_password,
     )
 
 
-def encode_jwt(
+async def encode_jwt(
     payload: dict,
     key: str = setting_conn.SECRET_KEY,
     algorithm: str = setting.auth_jwt.algorithm,
@@ -56,10 +59,11 @@ def encode_jwt(
 
     """
     encoded = jwt.encode(payload, key, algorithm=algorithm)
+    await asyncio.sleep(0)
     return encoded
 
 
-def decode_jwt(
+async def decode_jwt(
     token: str | bytes,
     key: str = setting_conn.SECRET_KEY,
     algorithm: str = setting.auth_jwt.algorithm,
@@ -76,10 +80,11 @@ def decode_jwt(
     :return: содержание токена (payload)
     """
     decoded = jwt.decode(token, key, algorithms=[algorithm])
+    await asyncio.sleep(0)
     return decoded
 
 
-def create_jwt(user: str) -> str:
+async def create_jwt(user: str) -> str:
     """
     Создание jwt-токен
     :param user: данные пользователя
@@ -93,4 +98,4 @@ def create_jwt(user: str) -> str:
         minutes=setting.auth_jwt.access_token_expire_minutes
     )
     payload["exp"] = expire
-    return encode_jwt(payload)
+    return await encode_jwt(payload)

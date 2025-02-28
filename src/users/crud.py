@@ -96,9 +96,8 @@ async def create_user(session: AsyncSession, user_data: UserCreateSchemas) -> Us
     except ValueError as exc:
         raise ErrorInData(exc)
     else:
-        new_user.hashed_password = create_hash_password(
-            new_user.hashed_password
-        ).decode()
+        new_user_hashed_password = await create_hash_password(new_user.hashed_password)
+        new_user.hashed_password = new_user_hashed_password.decode()
 
         new_bank_account: str = await generate_bank_account()
         while True:
