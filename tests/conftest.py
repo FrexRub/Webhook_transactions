@@ -69,7 +69,7 @@ async def client(override_get_db) -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest_asyncio.fixture(loop_scope="session", scope="function")
-async def test_user_admin(db_session):
+async def test_user_admin(db_session) -> User:
     stmt = select(User).filter(User.email == "testuser@example.com")
     res: Result = await db_session.execute(stmt)
     user: User = res.scalar_one_or_none()
