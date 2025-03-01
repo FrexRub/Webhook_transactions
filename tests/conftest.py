@@ -85,3 +85,15 @@ async def test_user_admin(db_session) -> User:
         await db_session.commit()
 
     return user
+
+
+@pytest_asyncio.fixture(loop_scope="session", scope="function")
+async def token_admin(
+    client: AsyncClient,
+    test_user_admin: User,
+) -> str:
+    token_response = await client.post(
+        "/token", data={"username": "testuser@example.com", "password": "1qaz!QAZ"}
+    )
+    token: str = token_response.json()["access_token"]
+    return token

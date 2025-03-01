@@ -27,21 +27,16 @@ async def test_authorization_user(
 async def test_create_user(
     event_loop: asyncio.AbstractEventLoop,
     client: AsyncClient,
-    test_user_admin: User,
+    token_admin: str,
     db_session: AsyncSession,
 ):
-    token_response = await client.post(
-        "/token", data={"username": "testuser@example.com", "password": "1qaz!QAZ"}
-    )
-    token = token_response.json()["access_token"]
-
     user = {
         "full_name": username,
         "email": email,
         "password": password,
     }
     response = await client.post(
-        "/users/create", json=user, headers={"Authorization": f"Bearer {token}"}
+        "/users/create", json=user, headers={"Authorization": f"Bearer {token_admin}"}
     )
 
     stmt = select(User).filter(User.email == email)
@@ -53,13 +48,10 @@ async def test_create_user(
 
 
 async def test_user_unique_email(
-    event_loop: asyncio.AbstractEventLoop, client: AsyncClient, test_user_admin: User
+    event_loop: asyncio.AbstractEventLoop,
+    client: AsyncClient,
+    token_admin: str,
 ):
-    token_response = await client.post(
-        "/token", data={"username": "testuser@example.com", "password": "1qaz!QAZ"}
-    )
-    token = token_response.json()["access_token"]
-
     user = {
         "full_name": username + "Lee",
         "email": email,
@@ -67,7 +59,7 @@ async def test_user_unique_email(
     }
 
     response = await client.post(
-        "/users/create", json=user, headers={"Authorization": f"Bearer {token}"}
+        "/users/create", json=user, headers={"Authorization": f"Bearer {token_admin}"}
     )
 
     assert response.json() == {"detail": "The email address is already in use"}
@@ -75,13 +67,10 @@ async def test_user_unique_email(
 
 
 async def test_user_bad_password(
-    event_loop: asyncio.AbstractEventLoop, client: AsyncClient, test_user_admin: User
+    event_loop: asyncio.AbstractEventLoop,
+    client: AsyncClient,
+    token_admin: str,
 ):
-    token_response = await client.post(
-        "/token", data={"username": "testuser@example.com", "password": "1qaz!QAZ"}
-    )
-    token = token_response.json()["access_token"]
-
     user = {
         "full_name": "Lee John",
         "email": "John@mail.ru",
@@ -89,7 +78,7 @@ async def test_user_bad_password(
     }
 
     response = await client.post(
-        "/users/create", json=user, headers={"Authorization": f"Bearer {token}"}
+        "/users/create", json=user, headers={"Authorization": f"Bearer {token_admin}"}
     )
 
     assert "Invalid password" in response.json()["detail"][0]["msg"]
@@ -97,15 +86,12 @@ async def test_user_bad_password(
 
 
 async def test_user_get_me(
-    event_loop: asyncio.AbstractEventLoop, client: AsyncClient, test_user_admin: User
+    event_loop: asyncio.AbstractEventLoop,
+    client: AsyncClient,
+    token_admin: str,
 ):
-    token_response = await client.post(
-        "/token", data={"username": "testuser@example.com", "password": "1qaz!QAZ"}
-    )
-    token = token_response.json()["access_token"]
-
     response = await client.get(
-        "/users/me", headers={"Authorization": f"Bearer {token}"}
+        "/users/me", headers={"Authorization": f"Bearer {token_admin}"}
     )
 
     assert response.status_code == 200
@@ -113,15 +99,12 @@ async def test_user_get_me(
 
 
 async def test_user_list(
-    event_loop: asyncio.AbstractEventLoop, client: AsyncClient, test_user_admin: User
+    event_loop: asyncio.AbstractEventLoop,
+    client: AsyncClient,
+    token_admin: str,
 ):
-    token_response = await client.post(
-        "/token", data={"username": "testuser@example.com", "password": "1qaz!QAZ"}
-    )
-    token = token_response.json()["access_token"]
-
     response = await client.get(
-        "/users/list", headers={"Authorization": f"Bearer {token}"}
+        "/users/list", headers={"Authorization": f"Bearer {token_admin}"}
     )
 
     assert response.status_code == 200
@@ -131,17 +114,12 @@ async def test_user_list(
 async def test_user_put(
     event_loop: asyncio.AbstractEventLoop,
     client: AsyncClient,
-    test_user_admin: User,
+    token_admin: str,
     db_session: AsyncSession,
 ):
-    token_response = await client.post(
-        "/token", data={"username": "testuser@example.com", "password": "1qaz!QAZ"}
-    )
-    token = token_response.json()["access_token"]
-
     user = {"full_name": "Lena", "email": "smirnova@mail.ru"}
     response = await client.put(
-        "/users/2/", json=user, headers={"Authorization": f"Bearer {token}"}
+        "/users/2/", json=user, headers={"Authorization": f"Bearer {token_admin}"}
     )
 
     stmt = select(User).filter(User.email == "smirnova@mail.ru")
@@ -157,17 +135,13 @@ async def test_user_put(
 async def test_user_patch(
     event_loop: asyncio.AbstractEventLoop,
     client: AsyncClient,
-    test_user_admin: User,
+    token_admin: str,
     db_session: AsyncSession,
 ):
-    token_response = await client.post(
-        "/token", data={"username": "testuser@example.com", "password": "1qaz!QAZ"}
-    )
-    token = token_response.json()["access_token"]
 
     user = {"email": "ivanova@mail.ru"}
     response = await client.patch(
-        "/users/2/", json=user, headers={"Authorization": f"Bearer {token}"}
+        "/users/2/", json=user, headers={"Authorization": f"Bearer {token_admin}"}
     )
 
     stmt = select(User).filter(User.email == "ivanova@mail.ru")
@@ -183,16 +157,11 @@ async def test_user_patch(
 async def test_user_delete(
     event_loop: asyncio.AbstractEventLoop,
     client: AsyncClient,
-    test_user_admin: User,
+    token_admin: str,
     db_session: AsyncSession,
 ):
-    token_response = await client.post(
-        "/token", data={"username": "testuser@example.com", "password": "1qaz!QAZ"}
-    )
-    token = token_response.json()["access_token"]
-
     response = await client.delete(
-        "/users/2/", headers={"Authorization": f"Bearer {token}"}
+        "/users/2/", headers={"Authorization": f"Bearer {token_admin}"}
     )
 
     stmt = select(User).filter(User.email == "ivanova@mail.ru")
