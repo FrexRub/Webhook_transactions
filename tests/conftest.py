@@ -2,7 +2,6 @@ import asyncio
 from typing import AsyncGenerator, Generator
 
 import pytest_asyncio
-from fastapi.security import OAuth2PasswordBearer
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.engine import Result
@@ -20,8 +19,6 @@ from src.core.jwt_utils import create_hash_password
 from src.users.schemas import UserCreateSchemas
 
 SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://test:test@localhost:5432/testdb"
-
-# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @pytest_asyncio.fixture(loop_scope="session", scope="session")

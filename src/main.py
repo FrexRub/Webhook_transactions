@@ -3,6 +3,7 @@ from typing import Annotated
 import logging
 
 from fastapi import FastAPI, Depends, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi_pagination import add_pagination
@@ -32,8 +33,38 @@ from src.core.exceptions import ErrorInData
 warnings.simplefilter("ignore", FastAPIPaginationWarning)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+description = """
+    API Transactions helps you do awesome stuff. 🚀
+
+    You will be able to:
+
+    * **Read users**
+    * **Create/Update/Remove users**
+    * **Get list scores user/users**
+    * **Get list scores**
+    * **Get list payments for user**
+    * **Make a transaction**
+"""  # noqa: W293
+
 # включение webhooks в документацию
-app = FastAPI(webhooks=webhooks_router)
+app = FastAPI(
+    title="API_Transactions",
+    description=description,
+    version="0.1.0",
+    docs_url="/docs",
+    webhooks=webhooks_router,
+)
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(router_users)
 app.include_router(router_payments)

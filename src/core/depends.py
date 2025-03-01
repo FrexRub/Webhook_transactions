@@ -4,23 +4,19 @@ import jwt
 from fastapi import Depends, status, Path
 from fastapi.exceptions import HTTPException
 from fastapi.security import (
-    APIKeyCookie,
     OAuth2PasswordBearer,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.config import COOKIE_NAME
 from src.core.database import get_async_session
 from src.core.jwt_utils import decode_jwt
 from src.users.crud import get_user_by_id
 from src.users.models import User
 
-# cookie_scheme = APIKeyCookie(name=COOKIE_NAME)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def current_user_authorization(
-    # token: str = Depends(cookie_scheme),
     token: Annotated[str, Depends(oauth2_scheme)],
     session: AsyncSession = Depends(get_async_session),
 ) -> User:
@@ -43,7 +39,6 @@ async def current_user_authorization(
 
 
 async def current_superuser_user(
-    # token: str = Depends(cookie_scheme),
     token: Annotated[str, Depends(oauth2_scheme)],
     session: AsyncSession = Depends(get_async_session),
 ) -> User:
