@@ -1,11 +1,6 @@
 from httpx import AsyncClient
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.engine import Result
 import asyncio
-
-from src.users.models import User
 
 username = "Bob"
 email = "Bob@mail.ru"
