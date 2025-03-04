@@ -15,4 +15,6 @@ async def test_list_users_scores(
 
     response = await client.post("/create_payment", json=user)
 
-    assert response.status_code == 202
+    assert response.status_code == 201
+    assert response.json()["transaction_id"] != ""
+    assert response.json()["signature"] != ""

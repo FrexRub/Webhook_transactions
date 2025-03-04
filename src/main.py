@@ -78,7 +78,7 @@ logger = logging.getLogger(__name__)
 @app.post(
     "/create_payment",
     response_class=JSONResponse,
-    status_code=status.HTTP_202_ACCEPTED,
+    status_code=status.HTTP_201_CREATED,
     tags=["main"],
 )
 async def create_payment(data_request: PaymentGenerateBaseSchemas):
@@ -89,7 +89,7 @@ async def create_payment(data_request: PaymentGenerateBaseSchemas):
 @app.post(
     "/transaction",
     response_class=JSONResponse,
-    status_code=status.HTTP_202_ACCEPTED,
+    status_code=status.HTTP_201_CREATED,
     tags=["main"],
 )
 async def post_process_transaction(
