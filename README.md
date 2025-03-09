@@ -36,12 +36,12 @@
 docker compose up -d
 ```
 
-При первом запуске проекта необходимо выполнить миграции базы данных с помощью Alembic 
+При первом запуске проекта необходимо выполнить миграции базы данных с помощью Alembic используя команду:
 
 ```
 docker compose exec app alembic upgrade head
 ```
-и создать тестовых пользователей
+а также создать тестовых пользователей
 ```
 docker compose exec app docker/create_users.sh
 ```
@@ -55,7 +55,7 @@ docker compose exec app docker/create_users.sh
 Страница с интерактивной документацией [http://127.0.0.1:80/docs](http://127.0.0.1:80/docs).
 ![страница c документацией проекта](readme_img/start_api.jpg)
 
-Для начала работы необходимо авторизоваться, для чего использутся меню Authorize.
+Перед началом работы необходимо авторизоваться, для чего использутся меню Authorize.
 
 ![Создание пользователя](readme_img/Authorize.jpg)
 
@@ -69,8 +69,17 @@ docker compose exec app docker/create_users.sh
 - main - создание/проведение платежа, JWT авторизация
 - Webhooks - документирование webhook сервиса
 
-
 ![Группы](readme_img/groups.jpg)
+
+Для проверки работы сервиса с помощью эндпоинта `create_payment` создаём тестовую транзакцию
+указав user_id пользователя, account_id счета пользователя, amount (сумму) транзакции. 
+
+![Группы](readme_img/test_tranzaction.jpg)
+
+С помощью эндпоинта `transaction` запускаем сформированную транзакцию, скопировав в тело запроса 
+результат предыдущего запроса 
+
+![Группы](readme_img/start_tranzaction.jpg)
 
 ## Тестирование проекта
 
