@@ -48,16 +48,18 @@ services:
   consumer:
     build: ./consumer
     container_name: consumer
+    command: ["python", "transactions.py"]
+    restart: always
     env_file:
       - .env
     depends_on:
-      - rabbitmq
       - db_tranz
+      - rabbitmq
     networks:
       - net
 
-  nginx_lib:
-    container_name: tranz-nginx
+  nginx_tranz:
+    container_name: nginx_tranz
     build: ./nginx
     volumes:
       - log_nginx:/var/log/nginx
